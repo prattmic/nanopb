@@ -796,6 +796,8 @@ class Message:
         self.ordered_fields = self.fields[:]
         self.ordered_fields.sort()
 
+        self.typedef = message_options.typedef_message
+
     def get_dependencies(self):
         '''Get list of type names that this structure refers to.'''
         deps = []
@@ -804,7 +806,12 @@ class Message:
         return deps
 
     def __str__(self):
-        result = 'typedef struct _%s {\n' % self.name
+        result = ''
+
+        if self.typedef:
+            result += 'typedef '
+
+        result += 'struct _%s {\n' % self.name
 
         if not self.ordered_fields:
             # Empty structs are not allowed in C standard.
@@ -817,7 +824,10 @@ class Message:
         if self.packed:
             result += ' pb_packed'
 
-        result += ' %s;' % self.name
+        if self.typedef:
+            result += ' %s;' % self.name
+        else:
+            result += ';'
 
         if self.packed:
             result = 'PB_PACKED_STRUCT_START\n' + result
@@ -1371,12 +1381,16 @@ optparser.add_option("-v", "--verbose", dest="verbose", action="store_true", def
     help="Print more information.")
 optparser.add_option("-s", dest="settings", metavar="OPTION:VALUE", action="append", default=[],
     help="Set generator option (max_size, max_count etc.).")
+optparser.add_option("--no-typedef", dest="typedef", action="store_false", default=True,
+    help="Do not typedef generated message structs to message name.")
 
 def parse_file(filename, fdesc, options):
     '''Parse a single file. Returns a ProtoFile instance.'''
     toplevel_options = nanopb_pb2.NanoPBOptions()
     for s in options.settings:
         text_format.Merge(s, toplevel_options)
+    if not options.typedef:
+        text_format.Merge('typedef_message:false', toplevel_options)
 
     if not fdesc:
         data = open(filename, 'rb').read()
