@@ -1060,8 +1060,10 @@ class ProtoFile:
         yield '#endif\n'
         yield '\n'
 
+        yield '#ifndef PB_NO_EXTERN_C\n'
         yield '#ifdef __cplusplus\n'
         yield 'extern "C" {\n'
+        yield '#endif\n'
         yield '#endif\n\n'
 
         if self.enums:
@@ -1144,9 +1146,11 @@ class ProtoFile:
 
             yield '#endif\n\n'
 
+        yield '#ifndef PB_NO_EXTERN_C\n'
         yield '#ifdef __cplusplus\n'
         yield '} /* extern "C" */\n'
         yield '#endif\n'
+        yield '#endif\n\n'
 
         # End of header
         yield '\n#endif\n'
