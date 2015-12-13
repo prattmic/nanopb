@@ -2,19 +2,20 @@
 
 import argparse
 import os.path
+import sys
 
 import generator.nanopb_generator as nanopb
 
 # TODO: plugin
 
-def generate_class(message):
+def generate_class(args, message):
     name = message.name
     base = "_%s" % name
 
-    print "\nclass %s : %s {" % (name, base)
+    args.output.write("\nclass %s : %s {" % (name, base))
 
     # Common code
-    print """
+    args.output.write("""
     // Default constructor.
     {name}() {{
         *static_cast<{base}>(this) = {name}_init_default;
@@ -33,17 +34,17 @@ def generate_class(message):
         return pb_encode(&stream, {name}_fields, this);
     }}
 
-""".format(name=name, base=base)
+""".format(name=name, base=base))
 
     for field in message.fields:
         if field.allocation != 'STATIC' or field.allocation == 'CALLBACK':
-            print """#error "Field %s has unsupported allocation '%s'" """ % (field.name, field.allocation)
+            args.output.write("""#error "Field %s has unsupported allocation '%s'" """ % (field.name, field.allocation))
             continue
         if field.array_decl:
-            print """#error "Field %s has unsupported array_decl %s" """ % (field.name, field.array_decl)
+            args.output.write("""#error "Field %s has unsupported array_decl %s" """ % (field.name, field.array_decl))
             continue
 
-        print """
+        args.output.write("""
     {type} get_{name}() {{
         return {name};
     }}
@@ -51,22 +52,27 @@ def generate_class(message):
     void set_{name}({type} val) {{
         {name} = val;
     }}
-""".format(name=field.name, type=field.ctype)
+""".format(name=field.name, type=field.ctype))
 
-    print "}"
+    args.output.write("};")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate nanopb C++ bindings')
-    parser.add_argument('files', nargs='+', help='files to parse')
+    parser.add_argument('file', help='file to parse')
+    parser.add_argument('-o', '--output', type=argparse.FileType('w'),
+                        default=sys.stdout, help='output file')
+    parser.add_argument('--include', default=None,
+                        help='base nanopb header include path. defaults to PROTO.pb.h.')
 
     args = parser.parse_args()
+    if args.include is None:
+        args.include = "%s.pb.h" % (os.path.splitext(args.file)[0])
 
-    for f in args.files:
-        options, _ = nanopb.optparser.parse_args([])
+    options, _ = nanopb.optparser.parse_args([])
 
-        proto = nanopb.parse_file(f, None, options)
+    proto = nanopb.parse_file(args.file, None, options)
 
-        print '#include "%s.pb.h"' % (os.path.splitext(f)[0])
+    args.output.write('#include "%s"' % (args.include))
 
-        for m in proto.messages:
-            generate_class(m)
+    for m in proto.messages:
+        generate_class(args, m)

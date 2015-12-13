@@ -95,3 +95,86 @@ def nanopb_library(name, src):
         hdrs = [srcs_name + ".pb.h"],
         deps = ["//:nanopb"],
     )
+
+def _nanopb_cpp_srcs(ctx):
+    proto = ctx.file.proto
+    nanopb_cpp_generator = ctx.executable._nanopb_cpp_generator
+
+    ctx.action(
+        inputs=[proto],
+        outputs=[
+            ctx.outputs.out,
+        ],
+        arguments = [
+            "--include",
+            ctx.file.nanopb_include.short_path,
+            "--output",
+            ctx.outputs.out.path,
+            proto.path,
+        ],
+        executable = nanopb_cpp_generator,
+    )
+
+nanopb_cpp_srcs = rule(
+    implementation=_nanopb_cpp_srcs,
+    attrs={
+        "_nanopb_cpp_generator": attr.label(
+                executable=True,
+                default=Label("//generator:nanopb_cpp_generator"),
+        ),
+        "proto": attr.label(
+            mandatory=True,
+            allow_files=True,
+            single_file=True,
+        ),
+        "out": attr.output(mandatory=True),
+        # Unfortunately Skylark does not expose the headers available from
+        # a cc_library, so we just pass the header directly.
+        "nanopb_include": attr.label(
+            mandatory=True,
+            allow_files=True,
+            single_file=True,
+        ),
+    },
+    # Required when generating headers.
+    output_to_genfiles=True,
+)
+
+def nanopb_cpp_library(name, src, lib=None):
+    """Create a C++ nanopb library from a proto or nanopb_library.
+
+    Args:
+        name: Target name
+        src: Source proto.
+        lib: Optional nanopb_library target. One will be created if not
+             specified.
+    """
+    if not lib:
+        lib = name + "_nanopb"
+        nanopb_library(
+            name = lib,
+            src = src,
+        )
+
+    srcs_name = name + "_srcs"
+    pb_name = name + "_pb"
+    header_name = "%s.pb.hpp" % (name)
+
+    proto_pb(
+        name = pb_name,
+        src = src,
+    )
+
+    nanopb_cpp_srcs(
+        name = srcs_name,
+        proto = pb_name,
+        out = header_name,
+        # We have to depend on internal details of nanopb_library here.
+        nanopb_include = lib + "_srcs.pb.h"
+    )
+
+    native.cc_library(
+        name = name,
+        hdrs = [header_name],
+        deps = [lib],
+    )
