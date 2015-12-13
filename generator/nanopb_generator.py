@@ -804,9 +804,7 @@ class Message:
         return deps
 
     def __str__(self):
-        result = ''
-
-        result += 'typedef struct _%s {\n' % self.name
+        result = 'typedef struct _%s {\n' % self.name
 
         if not self.ordered_fields:
             # Empty structs are not allowed in C standard.
