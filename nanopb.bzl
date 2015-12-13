@@ -44,6 +44,7 @@ def _nanopb_srcs(ctx):
             ctx.outputs.header,
         ],
         arguments = [
+            "--message-prefix=c",
             "--generated-include-format",
             '#include "%s/%%s"' % (include_dir),
             "--library-include-format",

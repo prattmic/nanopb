@@ -66,8 +66,8 @@ message NanoPBOptions {
   // decode oneof as anonymous union
   optional bool anonymous_oneof = 11 [default = false];
 
-  // typedef the message struct to the name of the message type.
-  optional bool typedef_message = 12 [default = true];
+  // add this prefix to the generated type name
+  optional string prefix = 12;
 }
 
 // Extensions to protoc 'Descriptor' type in order to define options
