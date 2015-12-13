@@ -90,8 +90,6 @@ class Names:
             return Names(self.parts + (other,))
         elif isinstance(other, tuple):
             return Names(self.parts + other)
-        elif isinstance(other, Names):
-            return Names(self.parts + other.parts)
         else:
             raise ValueError("Name parts should be of type str")
 
@@ -755,9 +753,6 @@ class Message:
         if message_options.msgid:
             self.msgid = message_options.msgid
 
-        if message_options.HasField("prefix"):
-            self.name = Names(message_options.prefix) + self.name
-
         if hasattr(desc, 'oneof_decl'):
             for i, f in enumerate(desc.oneof_decl):
                 oneof_options = get_nanopb_suboptions(desc, message_options, self.name + f.name)
@@ -796,6 +791,8 @@ class Message:
         self.ordered_fields = self.fields[:]
         self.ordered_fields.sort()
 
+        self.typedef = message_options.typedef_message
+
     def get_dependencies(self):
         '''Get list of type names that this structure refers to.'''
         deps = []
@@ -817,7 +814,10 @@ class Message:
         if self.packed:
             result += ' pb_packed'
 
-        result += ' %s;' % self.name
+        if self.typedef:
+            result += ' %s;' % self.name
+        else:
+            result += ';'
 
         if self.packed:
             result = 'PB_PACKED_STRUCT_START\n' + result
@@ -1375,16 +1375,16 @@ optparser.add_option("-v", "--verbose", dest="verbose", action="store_true", def
     help="Print more information.")
 optparser.add_option("-s", dest="settings", metavar="OPTION:VALUE", action="append", default=[],
     help="Set generator option (max_size, max_count etc.).")
-optparser.add_option("--message-prefix",
-    help="Add this prefix to all generated message type names.")
+optparser.add_option("--no-typedef", dest="typedef", action="store_false", default=True,
+    help="Do not typedef generated message structs to message name.")
 
 def parse_file(filename, fdesc, options):
     '''Parse a single file. Returns a ProtoFile instance.'''
     toplevel_options = nanopb_pb2.NanoPBOptions()
     for s in options.settings:
         text_format.Merge(s, toplevel_options)
-    if options.message_prefix:
-        text_format.Merge('prefix:"%s"' % (options.message_prefix), toplevel_options)
+    if not options.typedef:
+        text_format.Merge('typedef_message:false', toplevel_options)
 
     if not fdesc:
         data = open(filename, 'rb').read()
