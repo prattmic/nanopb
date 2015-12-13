@@ -10,7 +10,7 @@ import generator.nanopb_generator as nanopb
 
 def generate_class(args, message):
     name = message.name
-    base = "nanopb::_%s" % name
+    base = "nanopb::%s" % name
 
     args.output.write("class %s : public %s {" % (name, base))
 
