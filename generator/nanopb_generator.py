@@ -29,17 +29,8 @@ except:
     ''' + '\n')
     raise
 
-try:
-    import proto.nanopb_pb2 as nanopb_pb2
-    import proto.plugin_pb2 as plugin_pb2
-except:
-    sys.stderr.write('''
-         ********************************************************************
-         *** Failed to import the protocol definitions for generator.     ***
-         *** You have to run 'make' in the nanopb/generator/proto folder. ***
-         ********************************************************************
-    ''' + '\n')
-    raise
+import generator.proto.nanopb_pb2 as nanopb_pb2
+import generator.proto.plugin_pb2 as plugin_pb2
 
 # ---------------------------------------------------------------------------
 #                     Generation of single fields

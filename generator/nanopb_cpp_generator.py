@@ -3,7 +3,7 @@
 import argparse
 import os.path
 
-import nanopb_generator as nanopb
+import generator.nanopb_generator as nanopb
 
 # TODO: plugin
 
