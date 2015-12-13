@@ -5,6 +5,7 @@ py_binary(
         "//generator/proto:nanopb_py",
         "//generator/proto:plugin_py",
     ],
+    visibility = ["//visibility:public"],
 )
 
 # nanopb_generator as a library.
@@ -23,4 +24,5 @@ py_binary(
     deps = [
         ":nanopb_generator_library",
     ],
+    visibility = ["//visibility:public"],
 )

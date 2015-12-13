@@ -29,8 +29,12 @@ except:
     ''' + '\n')
     raise
 
-import generator.proto.nanopb_pb2 as nanopb_pb2
-import generator.proto.plugin_pb2 as plugin_pb2
+try:
+    import generator.proto.nanopb_pb2 as nanopb_pb2
+    import generator.proto.plugin_pb2 as plugin_pb2
+except ImportError:
+    import proto.nanopb_pb2 as nanopb_pb2
+    import proto.plugin_pb2 as plugin_pb2
 
 # ---------------------------------------------------------------------------
 #                     Generation of single fields
