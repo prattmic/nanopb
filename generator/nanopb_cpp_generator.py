@@ -16,9 +16,9 @@ def generate_class(args, message):
 
     # Common code
     args.output.write("""
- public:
     using _base = {base};
 
+ public:
     // Default constructor.
     {name}() {{
         *static_cast<_base*>(this) = nanopb::{name}_init_default;
@@ -61,16 +61,7 @@ def generate_class(args, message):
     {type} get_{name}() {{
         return {name};
     }}
-""".format(name=field.name, type=field_type))
 
-        if field.pbtype == "MESSAGE":
-            args.output.write("""
-    void set_{name}({type} val) {{
-        {name} = static_cast<{type}::_base>(val);
-    }}
-""".format(name=field.name, type=field_type))
-        else:
-            args.output.write("""
     void set_{name}({type} val) {{
         {name} = val;
     }}

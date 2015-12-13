@@ -28,11 +28,20 @@ void phone_number(void) {
     }
 
     auto p2 = Person_PhoneNumber::Decode(buf, 256);
-    printf("type = %d\n", p2.get_type());
+    printf("want = %d type = %d\n", nanopb::Person_PhoneType_WORK, p2.get_type());
+}
+
+void people(void) {
+    Person p;
+    p.set_id(50);
+
+    People pp;
+    pp.set_leader(p);
 }
 
 int main(void) {
     person();
     phone_number();
+    people();
     return 0;
 }
