@@ -9,7 +9,7 @@
 #include "pb.h"
 
 #ifdef __cplusplus
-extern "C" {
+namespace nanopb {
 #endif
 
 /* Structure for defining custom input streams. You will need to provide
@@ -143,7 +143,7 @@ bool pb_make_string_substream(pb_istream_t *stream, pb_istream_t *substream);
 void pb_close_string_substream(pb_istream_t *stream, pb_istream_t *substream);
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // namespace nanopb
 #endif
 
 #endif

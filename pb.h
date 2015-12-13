@@ -76,6 +76,10 @@
 #endif
 #endif
 
+#ifdef __cplusplus
+namespace nanopb {
+#endif
+
 /* Macro for defining packed structures (compiler dependent).
  * This just reduces memory requirements, but is not required.
  */
@@ -558,5 +562,9 @@ struct pb_extension_s {
 #endif
 
 #define PB_RETURN_ERROR(stream, msg) return PB_SET_ERROR(stream, msg), false
+
+#ifdef __cplusplus
+}  // namespace nanopb
+#endif
 
 #endif

@@ -94,6 +94,12 @@ def nanopb_library(name, src):
         srcs = [srcs_name + ".pb.c"],
         hdrs = [srcs_name + ".pb.h"],
         deps = ["//:nanopb"],
+        # We use C++ features, even though these are .c
+        copts = [
+            "-x",
+            "c++",
+            "-std=c++0x",
+        ],
     )
 
 def _nanopb_cpp_srcs(ctx):

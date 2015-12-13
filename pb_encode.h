@@ -9,7 +9,7 @@
 #include "pb.h"
 
 #ifdef __cplusplus
-extern "C" {
+namespace nanopb {
 #endif
 
 /* Structure for defining custom output streams. You will need to provide
@@ -148,7 +148,7 @@ bool pb_encode_fixed64(pb_ostream_t *stream, const void *value);
 bool pb_encode_submessage(pb_ostream_t *stream, const pb_field_t fields[], const void *src_struct);
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // namespace nanopb
 #endif
 
 #endif

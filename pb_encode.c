@@ -17,6 +17,10 @@
     #define checkreturn __attribute__((warn_unused_result))
 #endif
 
+#ifdef __cplusplus
+namespace nanopb {
+#endif
+
 /**************************************
  * Declarations internal to this file *
  **************************************/
@@ -688,3 +692,6 @@ static bool checkreturn pb_enc_submessage(pb_ostream_t *stream, const pb_field_t
     return pb_encode_submessage(stream, (const pb_field_t*)field->ptr, src);
 }
 
+#ifdef __cplusplus
+}  // namespace nanopb
+#endif

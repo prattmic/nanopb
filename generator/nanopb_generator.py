@@ -1060,10 +1060,8 @@ class ProtoFile:
         yield '#endif\n'
         yield '\n'
 
-        yield '#ifndef PB_NO_EXTERN_C\n'
         yield '#ifdef __cplusplus\n'
-        yield 'extern "C" {\n'
-        yield '#endif\n'
+        yield 'namespace nanopb {\n'
         yield '#endif\n\n'
 
         if self.enums:
@@ -1092,10 +1090,22 @@ class ProtoFile:
             yield '/* Initializer values for message structs */\n'
             for msg in self.messages:
                 identifier = '%s_init_default' % msg.name
-                yield '#define %-40s %s\n' % (identifier, msg.get_initializer(False))
+                initializer = msg.get_initializer(False)
+
+                yield '#ifdef __cplusplus\n'
+                yield 'constexpr %s %-40s = %s;\n' % (msg.name, identifier, initializer)
+                yield '#else\n'
+                yield '#define %-40s %s\n' % (identifier, initializer)
+                yield '#endif\n'
             for msg in self.messages:
                 identifier = '%s_init_zero' % msg.name
-                yield '#define %-40s %s\n' % (identifier, msg.get_initializer(True))
+                initializer = msg.get_initializer(True)
+
+                yield '#ifdef __cplusplus\n'
+                yield 'constexpr %s %-40s = %s;\n' % (msg.name, identifier, initializer)
+                yield '#else\n'
+                yield '#define %-40s %s\n' % (identifier, initializer)
+                yield '#endif\n'
             yield '\n'
 
             yield '/* Field tags (for use in manual encoding/decoding) */\n'
@@ -1146,10 +1156,8 @@ class ProtoFile:
 
             yield '#endif\n\n'
 
-        yield '#ifndef PB_NO_EXTERN_C\n'
         yield '#ifdef __cplusplus\n'
-        yield '} /* extern "C" */\n'
-        yield '#endif\n'
+        yield '} /* namespace nanopb */\n'
         yield '#endif\n\n'
 
         # End of header
@@ -1170,6 +1178,10 @@ class ProtoFile:
         yield '#error Regenerate this file with the current version of nanopb generator.\n'
         yield '#endif\n'
         yield '\n'
+
+        yield '#ifdef __cplusplus\n'
+        yield 'namespace nanopb {\n'
+        yield '#endif\n\n'
 
         for msg in self.messages:
             yield msg.default_decl(False)
@@ -1255,6 +1267,10 @@ class ProtoFile:
             yield ' * To get rid of this error, remove any double fields from your .proto.\n'
             yield ' */\n'
             yield 'PB_STATIC_ASSERT(sizeof(double) == 8, DOUBLE_MUST_BE_8_BYTES)\n'
+
+        yield '#ifdef __cplusplus\n'
+        yield '} /* namespace nanopb */\n'
+        yield '#endif\n\n'
 
         yield '\n'
 

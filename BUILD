@@ -11,5 +11,11 @@ cc_library(
         "pb_encode.h",
         "pb_decode.h",
     ],
+    # We use C++ features, even though these are .c
+    copts = [
+        "-x",
+        "c++",
+        "-std=c++0x",
+    ],
     visibility = ["//visibility:public"],
 )

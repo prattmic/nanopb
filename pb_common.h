@@ -8,7 +8,7 @@
 #include "pb.h"
 
 #ifdef __cplusplus
-extern "C" {
+namespace nanopb {
 #endif
 
 /* Iterator for pb_field_t list */
@@ -35,7 +35,7 @@ bool pb_field_iter_next(pb_field_iter_t *iter);
 bool pb_field_iter_find(pb_field_iter_t *iter, uint32_t tag);
 
 #ifdef __cplusplus
-} /* extern "C" */
+}  // namespace nanopb
 #endif
 
 #endif

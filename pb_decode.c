@@ -17,6 +17,10 @@
 #include "pb_decode.h"
 #include "pb_common.h"
 
+#ifdef __cplusplus
+namespace nanopb {
+#endif
+
 /**************************************
  * Declarations internal to this file *
  **************************************/
@@ -1320,3 +1324,7 @@ static bool checkreturn pb_dec_submessage(pb_istream_t *stream, const pb_field_t
     pb_close_string_substream(stream, &substream);
     return status;
 }
+
+#ifdef __cplusplus
+}  // namespace nanopb
+#endif
