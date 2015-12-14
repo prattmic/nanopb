@@ -23,8 +23,8 @@ def generate_class(args, message):
     }}
 
     // Copy constructor from base type.
-    {name}(const _base& v) {{
-        *this = static_cast<{name}>(v);
+    explicit {name}(const _base& v) {{
+        *this = static_cast<const {name}&>(v);
     }}
 
     // Decode from a buffer.
@@ -57,7 +57,7 @@ def generate_class(args, message):
 
         args.output.write("""
     {type} get_{name}() {{
-        return {name};
+        return {type}({name});
     }}
 
     void set_{name}({type} val) {{
