@@ -8,6 +8,8 @@ def _proto_pb(ctx):
         inputs=[src],
         outputs=[out],
         command = cmd,
+        progress_message = "Compiling %s to create %s" \
+            % (src.basename, out.basename),
     )
 
 proto_pb = rule(
@@ -23,22 +25,22 @@ proto_pb = rule(
 )
 
 def _nanopb_srcs(ctx):
-    src = ctx.file.src
-    _renamed_src = ctx.outputs._renamed_src
+    proto = ctx.file.proto
+    _renamed_proto = ctx.outputs._renamed_proto
     nanopb_generator = ctx.executable._nanopb_generator
 
     include_dir = ctx.outputs.source.short_path.rsplit("/", 1)[0]
 
     # nanopb_generator simply creates FOO.pb.h and FOO.pb.c from FOO.pb,
-    # so we need to make sure src actually looks like FOO.pb.
+    # so we need to make sure proto actually looks like FOO.pb.
     ctx.action(
-        inputs=[src],
-        outputs=[_renamed_src],
-        command = "cp %s %s" % (src.path, _renamed_src.path),
+        inputs=[proto],
+        outputs=[_renamed_proto],
+        command = "cp %s %s" % (proto.path, _renamed_proto.path),
     )
 
     ctx.action(
-        inputs=[_renamed_src],
+        inputs=[_renamed_proto],
         outputs=[
             ctx.outputs.source,
             ctx.outputs.header,
@@ -48,9 +50,10 @@ def _nanopb_srcs(ctx):
             '#include "%s/%%s"' % (include_dir),
             "--library-include-format",
             '#include "%s"',
-            _renamed_src.path
+            _renamed_proto.path
         ],
         executable = nanopb_generator,
+        progress_message = "Generating nanopb C source from %s" % (proto.basename),
     )
 
 nanopb_srcs = rule(
@@ -60,14 +63,14 @@ nanopb_srcs = rule(
                 executable=True,
                 default=Label("//generator:nanopb_generator"),
         ),
-        "src": attr.label(
+        "proto": attr.label(
             mandatory=True,
             allow_files=True,
             single_file=True,
         ),
     },
     outputs={
-        "_renamed_src": "%{name}.pb",
+        "_renamed_proto": "%{name}.pb",
         "source": "%{name}.pb.c",
         "header": "%{name}.pb.h",
     },
@@ -75,18 +78,18 @@ nanopb_srcs = rule(
     output_to_genfiles=True,
 )
 
-def nanopb_library(name, src):
+def nanopb_library(name, proto):
     pb_name = name + "_pb"
     srcs_name = name + "_srcs"
 
     proto_pb(
         name = pb_name,
-        src = src,
+        src = proto,
     )
 
     nanopb_srcs(
         name = srcs_name,
-        src = pb_name,
+        proto = pb_name,
     )
 
     native.cc_library(
@@ -119,6 +122,8 @@ def _nanopb_cpp_srcs(ctx):
             proto.path,
         ],
         executable = nanopb_cpp_generator,
+        progress_message = "Generating nanopb C++ source from %s" \
+            % (proto.basename),
     )
 
 nanopb_cpp_srcs = rule(
@@ -146,12 +151,12 @@ nanopb_cpp_srcs = rule(
     output_to_genfiles=True,
 )
 
-def nanopb_cpp_library(name, src, lib=None):
+def nanopb_cpp_library(name, proto, lib=None):
     """Create a C++ nanopb library from a proto or nanopb_library.
 
     Args:
         name: Target name
-        src: Source proto.
+        proto: Source proto.
         lib: Optional nanopb_library target. One will be created if not
              specified.
     """
@@ -159,7 +164,7 @@ def nanopb_cpp_library(name, src, lib=None):
         lib = name + "_nanopb"
         nanopb_library(
             name = lib,
-            src = src,
+            proto = proto,
         )
 
     srcs_name = name + "_srcs"
@@ -168,7 +173,7 @@ def nanopb_cpp_library(name, src, lib=None):
 
     proto_pb(
         name = pb_name,
-        src = src,
+        src = proto,
     )
 
     nanopb_cpp_srcs(

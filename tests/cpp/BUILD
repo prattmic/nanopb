@@ -2,7 +2,7 @@ load("/nanopb", "nanopb_cpp_library")
 
 nanopb_cpp_library(
     name = "person",
-    src = "person.proto",
+    proto = "person.proto",
 )
 
 cc_binary(
@@ -13,7 +13,7 @@ cc_binary(
 
 nanopb_cpp_library(
     name = "simple",
-    src = "simple.proto",
+    proto = "simple.proto",
 )
 
 cc_test(
