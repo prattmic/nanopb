@@ -15,7 +15,6 @@
 #ifndef UTIL_TASK_STATUSOR_H__
 #define UTIL_TASK_STATUSOR_H__
 
-#include "base/logging.h"
 #include "util/task/status.h"
 
 namespace util {
@@ -27,7 +26,7 @@ class StatusOr {
   // Has status UNKNOWN.
   inline StatusOr();
 
-  // Builds from a non-OK status. Crashes if an OK status is specified.
+  // Builds from a non-OK status.
   inline StatusOr(const ::util::Status& status);  // NOLINT
 
   // Builds from the specified value.
@@ -53,9 +52,8 @@ class StatusOr {
   // Shorthand for status().ok().
   inline bool ok() const { return status_.ok(); }
 
-  // Returns value or crashes if ok() is false.
-  inline const T& ValueOrDie() const {
-    CHECK(ok()) << "Attempting to fetch value of non-OK StatusOr";
+  // Returns value.
+  inline const T& Value() const {
     return value_;
   }
 
@@ -74,9 +72,7 @@ inline StatusOr<T>::StatusOr()
 
 template <typename T>
 inline StatusOr<T>::StatusOr(const ::util::Status& status)
-    : status_(status) {
-  CHECK(!status.ok()) << "Status::OK is not a valid argument to StatusOr";
-}
+    : status_(status) {}
 
 template <typename T>
 inline StatusOr<T>::StatusOr(const T& value)

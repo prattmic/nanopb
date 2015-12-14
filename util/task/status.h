@@ -15,13 +15,30 @@
 #ifndef UTIL_TASK_STATUS_H__
 #define UTIL_TASK_STATUS_H__
 
-#include <string>
-
-#include "base/macros.h"
-#include "strings/stringpiece.h"
-#include "util/task/codes.pb.h"
-
 namespace util {
+
+namespace error {
+    // These values must match error codes defined in codes.proto.
+    enum Code {
+        OK = 0,
+        CANCELLED = 1,
+        UNKNOWN = 2,
+        INVALID_ARGUMENT = 3,
+        DEADLINE_EXCEEDED = 4,
+        NOT_FOUND = 5,
+        ALREADY_EXISTS = 6,
+        PERMISSION_DENIED = 7,
+        UNAUTHENTICATED = 16,
+        RESOURCE_EXHAUSTED = 8,
+        FAILED_PRECONDITION = 9,
+        ABORTED = 10,
+        OUT_OF_RANGE = 11,
+        UNIMPLEMENTED = 12,
+        INTERNAL = 13,
+        UNAVAILABLE = 14,
+        DATA_LOSS = 15,
+    };
+}  // namespace error
 
 // A Status is a combination of an error code and a string message (for non-OK
 // error codes).
@@ -31,7 +48,8 @@ class Status {
   Status();
 
   // Make a Status from the specified error and message.
-  Status(::util::error::Code error, StringPiece error_message);
+  // The error message must have static lifetime.
+  Status(::util::error::Code error, const char *error_message);
 
   Status(const Status &other);
   Status &operator=(const Status &other);
@@ -45,7 +63,7 @@ class Status {
   bool ok() const { return code_ == ::util::error::OK; }
   int error_code() const {return code_; }
   ::util::error::Code CanonicalCode() const { return code_; }
-  const ::std::string& error_message() const { return message_; }
+  const char *error_message() const { return message_; }
 
   bool operator==(const Status& x) const;
   bool operator!=(const Status& x) const;
@@ -53,11 +71,11 @@ class Status {
   // NoOp
   void IgnoreError() const {}
 
-  ::std::string ToString() const;
+  const char *ToString() const;
 
  private:
   ::util::error::Code code_;
-  ::std::string message_;
+  const char *message_;
 };
 
 inline bool Status::operator==(const Status &other) const {
@@ -67,8 +85,6 @@ inline bool Status::operator==(const Status &other) const {
 inline bool Status::operator!=(const Status &other) const {
   return !(*this == other);
 }
-
-extern ::std::ostream& operator<<(::std::ostream& os, const Status& other);
 
 }  // namespace util
 

@@ -14,11 +14,6 @@
 
 #include "util/task/status.h"
 
-#include "strings/substitute.h"
-
-using ::std::ostream;
-using ::std::string;
-
 namespace util {
 
 namespace {
@@ -42,10 +37,10 @@ const Status &GetUnknown() {
 
 Status::Status() : code_(::util::error::OK), message_("") {}
 
-Status::Status(::util::error::Code error, StringPiece error_message)
-    : code_(error), message_(error_message.ToString()) {
+Status::Status(::util::error::Code error, const char *error_message)
+    : code_(error), message_(error_message) {
   if (code_ == ::util::error::OK) {
-    message_.clear();
+    message_ = nullptr;
   }
 }
 
@@ -62,17 +57,12 @@ const Status &Status::OK = GetOk();
 const Status &Status::CANCELLED = GetCancelled();
 const Status &Status::UNKNOWN = GetUnknown();
 
-string Status::ToString() const {
+const char *Status::ToString() const {
   if (code_ == ::util::error::OK) {
     return "OK";
   }
 
-  return ::strings::Substitute("$0: $1", code_, message_);
-}
-
-extern ostream& operator<<(ostream& os, const Status& other) {
-  os << other.ToString();
-  return os;
+  return message_;
 }
 
 }  // namespace util
