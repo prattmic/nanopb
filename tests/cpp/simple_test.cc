@@ -68,7 +68,7 @@ TEST(SimpleTest, SetGet) {
     EXPECT_EQ(5ull, submsg.get_optional_default_three_field());
 }
 
-TEST(SimpleTest, EncodeDecode) {
+TEST(SimpleTest, Serialize) {
     Simple orig;
 
     orig.set_required_field(true);
@@ -83,9 +83,9 @@ TEST(SimpleTest, EncodeDecode) {
     orig.set_submessage_field(submsg);
 
     uint8_t buf[Simple_size] = { 0 };
-    ASSERT_TRUE(orig.Encode(buf, Simple_size));
+    ASSERT_TRUE(orig.Serialize(buf, Simple_size));
 
-    auto statusor = Simple::Decode(buf, Simple_size);
+    auto statusor = Simple::Deserialize(buf, Simple_size);
     ASSERT_TRUE(statusor.ok());
 
     auto decoded = statusor.Value();

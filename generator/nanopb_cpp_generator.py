@@ -27,8 +27,8 @@ def generate_class(args, message):
         *this = static_cast<const {name}&>(v);
     }}
 
-    // Decode from a buffer.
-    static ::util::StatusOr<{name}> Decode(uint8_t *buffer, int size) {{
+    // Deserialize from a buffer.
+    static ::util::StatusOr<{name}> Deserialize(uint8_t *buffer, int size) {{
         {name} msg;
         nanopb::pb_istream_t stream = nanopb::pb_istream_from_buffer(buffer, size);
         if (!nanopb::pb_decode(&stream, nanopb::{name}_fields, &msg)) {{
@@ -37,7 +37,8 @@ def generate_class(args, message):
         return msg;
     }}
 
-    bool Encode(uint8_t *buffer, int size) {{
+    // Serialize to a buffer.
+    bool Serialize(uint8_t *buffer, int size) {{
         nanopb::pb_ostream_t stream = nanopb::pb_ostream_from_buffer(buffer, size);
         return nanopb::pb_encode(&stream, nanopb::{name}_fields, this);
     }}
