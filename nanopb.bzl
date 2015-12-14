@@ -187,5 +187,8 @@ def nanopb_cpp_library(name, proto, lib=None):
     native.cc_library(
         name = name,
         hdrs = [header_name],
-        deps = [lib],
+        deps = [
+            lib,
+            "//util/task:status",
+        ],
     )

@@ -85,7 +85,10 @@ TEST(SimpleTest, EncodeDecode) {
     uint8_t buf[Simple_size] = { 0 };
     ASSERT_TRUE(orig.Encode(buf, Simple_size));
 
-    Simple decoded = Simple::Decode(buf, Simple_size);
+    auto statusor = Simple::Decode(buf, Simple_size);
+    ASSERT_TRUE(statusor.ok());
+
+    auto decoded = statusor.Value();
 
     EXPECT_EQ(orig.get_required_field(), decoded.get_required_field());
     EXPECT_EQ(orig.get_optional_field(), decoded.get_optional_field());
