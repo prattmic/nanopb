@@ -1,9 +1,9 @@
 message Simple {
-  required bool this_is_required = 1;
-  optional bool this_is_optional = 2;
+  required bool required_field = 1;
+  optional bool optional_field = 2;
 
-  optional int32 an_int = 3;
-  optional double a_double = 4;
+  optional int32 int_field = 3;
+  optional double double_field = 4;
 
   enum Enum {
     ONE = 1;
@@ -11,11 +11,12 @@ message Simple {
     THREE = 3;
   }
 
-  optional Enum an_enum = 5;
+  optional Enum enum_field = 5;
 
   message SubMessage {
-    optional uint64 default_three = 1 [default = 3];
+    required uint64 required_default_three_field = 1 [default = 3];
+    optional uint64 optional_default_three_field = 2 [default = 3];
   }
 
-  optional SubMessage submessage = 6;
+  optional SubMessage submessage_field = 6;
 }

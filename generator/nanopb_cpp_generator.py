@@ -44,26 +44,61 @@ def generate_class(args, message):
 
     for field in message.fields:
         if field.allocation != 'STATIC' or field.allocation == 'CALLBACK':
-            args.output.write("""#warning "Field %s has unsupported allocation '%s'"\n""" % (field.name, field.allocation))
+            raise NotImplementedError(
+                "Field %s has unsupported allocation '%s'" \
+                    % (field.name, field.allocation))
             continue
         if field.array_decl:
-            args.output.write("""#warning "Field %s has unsupported array_decl %s"\n""" % (field.name, field.array_decl))
-            continue
+            raise NotImplementedError(
+                "Field %s has unsupported array_decl %s" \
+                    % (field.name, field.array_decl))
+
+        is_enum = field.pbtype in ("ENUM", "UENUM")
+        is_optional = field.rules == "OPTIONAL"
 
         field_type = str(field.ctype)
-        if field.pbtype in ("ENUM", "UENUM"):
+        if is_enum:
             # We don't redefine these, so they come from nanopb directly.
             field_type = "nanopb::"+field_type
 
         args.output.write("""
-    {type} get_{name}() const {{
-        return {type}({name});
+    {type} get_{field}() const {{
+        return {type}({field});
+    }}
+""".format(field=field.name, type=field_type))
+
+        if is_optional:
+            args.output.write("""
+    // TODO(prattmic): rename to has_{field}
+    // has_{field} is taken by the base type :(
+    bool present_{field}() const {{
+        return has_{field};
     }}
 
-    void set_{name}({type} val) {{
-        {name} = val;
+    void set_{field}({type} val) {{
+        {field} = val;
+        has_{field} = true;
     }}
-""".format(name=field.name, type=field_type))
+
+    void clear_{field}() {{
+        has_{field} = false;
+        {field} = nanopb::{message}_init_default.{field};
+    }}
+""".format(message=message.name, field=field.name, type=field_type))
+        else:
+            args.output.write("""
+    bool present_{field}() const {{
+        return true;
+    }}
+
+    void set_{field}({type} val) {{
+        {field} = val;
+    }}
+
+    void clear_{field}() {{
+        {field} = nanopb::{message}_init_default.{field};
+    }}
+""".format(message=message.name, field=field.name, type=field_type))
 
     args.output.write("};\n\n")
 
