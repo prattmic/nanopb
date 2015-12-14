@@ -6,7 +6,12 @@ genrule(
         "google/protobuf/descriptor.proto",
     ],
     outs = ["nanopb_pb2.py"],
-    cmd = "protoc --python_out=$(@D) -Igenerator/proto $(location :nanopb.proto)",
+    cmd = " ".join([
+        "protoc",
+        "--python_out=$(@D)",
+        "-I$$(dirname $(location :nanopb.proto))",
+        "$(location :nanopb.proto)",
+    ]),
 )
 
 py_library(
@@ -22,7 +27,12 @@ genrule(
         "google/protobuf/descriptor.proto",
     ],
     outs = ["plugin_pb2.py"],
-    cmd = "protoc --python_out=$(@D) -Igenerator/proto $(location :plugin.proto)",
+    cmd = " ".join([
+        "protoc",
+        "--python_out=$(@D)",
+        "-I$$(dirname $(location :plugin.proto))",
+        "$(location :plugin.proto)",
+    ]),
 )
 
 py_library(
