@@ -19,7 +19,7 @@ def generate_class(args, message):
  public:
     // Default constructor.
     {name}() {{
-        *static_cast<_base*>(this) = {name}_init_default;
+        *static_cast<_base*>(this) = nanopb::{name}_init_default;
     }}
 
     // Copy constructor from base type.

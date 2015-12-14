@@ -363,14 +363,11 @@ class Field:
         else:
             return []
 
-    def get_initializer(self, null_init, inner_init_only=False, namespace=False):
+    def get_initializer(self, null_init, inner_init_only = False):
         '''Return literal expression for this field's default value.
         null_init: If True, initialize to a 0 value instead of default from .proto
         inner_init_only: If True, exclude initialization for any count/has fields
         '''
-        prefix = ""
-        if namespace:
-            prefix = "::nanopb::"
 
         inner_init = None
         if self.pbtype == 'MESSAGE':
@@ -384,7 +381,7 @@ class Field:
             elif self.pbtype == 'BYTES':
                 inner_init = '{0, {0}}'
             elif self.pbtype in ('ENUM', 'UENUM'):
-                inner_init = '(%s)0' % (prefix+str(self.ctype))
+                inner_init = '(%s)0' % self.ctype
             else:
                 inner_init = '0'
         else:
@@ -403,8 +400,6 @@ class Field:
                 inner_init = str(self.default) + 'ull'
             elif self.pbtype in ['SFIXED64', 'INT64']:
                 inner_init = str(self.default) + 'll'
-            elif self.pbtype in ['ENUM', 'UENUM']:
-                inner_init = '%s' % (prefix+str(self.default))
             else:
                 inner_init = str(self.default)
 
@@ -833,13 +828,13 @@ class Message:
     def types(self):
         return ''.join([f.types() for f in self.fields])
 
-    def get_initializer(self, null_init, namespace=False):
+    def get_initializer(self, null_init):
         if not self.ordered_fields:
             return '{0}'
 
         parts = []
         for field in self.ordered_fields:
-            parts.append(field.get_initializer(null_init, namespace=namespace))
+            parts.append(field.get_initializer(null_init))
         return '{' + ', '.join(parts) + '}'
 
     def default_decl(self, declaration_only = False):
@@ -1087,34 +1082,36 @@ class ProtoFile:
             yield '\n'
 
         if self.messages:
+            sorted_msgs = list(sort_dependencies(self.messages))
+
             yield '/* Default values for struct fields */\n'
-            for msg in self.messages:
+            for msg in sorted_msgs:
                 yield msg.default_decl(True)
             yield '\n'
 
             yield '/* Initializer values for message structs */\n'
-
-            for msg in self.messages:
+            for msg in sorted_msgs:
                 identifier = '%s_init_default' % msg.name
+                initializer = msg.get_initializer(False)
+
                 yield '#ifdef __cplusplus\n'
-                initializer = msg.get_initializer(False, namespace=True)
-                yield '#define %-40s %s\n' % (identifier, initializer)
+                yield 'constexpr %s %-40s = %s;\n' % (msg.name, identifier, initializer)
                 yield '#else\n'
-                initializer = msg.get_initializer(False, namespace=False)
                 yield '#define %-40s %s\n' % (identifier, initializer)
-                yield '#endif\n\n'
-            for msg in self.messages:
+                yield '#endif\n'
+            for msg in sorted_msgs:
                 identifier = '%s_init_zero' % msg.name
+                initializer = msg.get_initializer(True)
+
                 yield '#ifdef __cplusplus\n'
-                initializer = msg.get_initializer(True, namespace=True)
-                yield '#define %-40s %s\n' % (identifier, initializer)
+                yield 'constexpr %s %-40s = %s;\n' % (msg.name, identifier, initializer)
                 yield '#else\n'
-                initializer = msg.get_initializer(True, namespace=False)
                 yield '#define %-40s %s\n' % (identifier, initializer)
-                yield '#endif\n\n'
+                yield '#endif\n'
+            yield '\n'
 
             yield '/* Field tags (for use in manual encoding/decoding) */\n'
-            for msg in sort_dependencies(self.messages):
+            for msg in sorted_msgs:
                 for field in msg.fields:
                     yield field.tags()
             for extension in self.extensions:
@@ -1122,12 +1119,12 @@ class ProtoFile:
             yield '\n'
 
             yield '/* Struct field encoding specification for nanopb */\n'
-            for msg in self.messages:
+            for msg in sorted_msgs:
                 yield msg.fields_declaration() + '\n'
             yield '\n'
 
             yield '/* Maximum encoded size of messages (where known) */\n'
-            for msg in self.messages:
+            for msg in sorted_msgs:
                 msize = msg.encoded_size(self.dependencies)
                 if msize is not None:
                     identifier = '%s_size' % msg.name
@@ -1137,7 +1134,7 @@ class ProtoFile:
             yield '/* Message IDs (where set with "msgid" option) */\n'
 
             yield '#ifdef PB_MSGID\n'
-            for msg in self.messages:
+            for msg in sorted_msgs:
                 if hasattr(msg,'msgid'):
                     yield '#define PB_MSG_%d %s\n' % (msg.msgid, msg.name)
             yield '\n'
@@ -1145,7 +1142,7 @@ class ProtoFile:
             symbol = make_identifier(headername.split('.')[0])
             yield '#define %s_MESSAGES \\\n' % symbol
 
-            for msg in self.messages:
+            for msg in sorted_msgs:
                 m = "-1"
                 msize = msg.encoded_size(self.dependencies)
                 if msize is not None:
@@ -1154,7 +1151,7 @@ class ProtoFile:
                     yield '\tPB_MSG(%d,%s,%s) \\\n' % (msg.msgid, m, msg.name)
             yield '\n'
 
-            for msg in self.messages:
+            for msg in sorted_msgs:
                 if hasattr(msg,'msgid'):
                     yield '#define %s_msgid %d\n' % (msg.name, msg.msgid)
             yield '\n'
