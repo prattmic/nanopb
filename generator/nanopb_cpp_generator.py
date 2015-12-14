@@ -56,7 +56,7 @@ def generate_class(args, message):
             field_type = "nanopb::"+field_type
 
         args.output.write("""
-    {type} get_{name}() {{
+    {type} get_{name}() const {{
         return {type}({name});
     }}
 
