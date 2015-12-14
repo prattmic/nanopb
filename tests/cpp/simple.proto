@@ -1,0 +1,21 @@
+message Simple {
+  required bool this_is_required = 1;
+  optional bool this_is_optional = 2;
+
+  optional int32 an_int = 3;
+  optional double a_double = 4;
+
+  enum Enum {
+    ONE = 1;
+    TWO = 2;
+    THREE = 3;
+  }
+
+  optional Enum an_enum = 5;
+
+  message SubMessage {
+    optional uint64 default_three = 1 [default = 3];
+  }
+
+  optional SubMessage submessage = 6;
+}

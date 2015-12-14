@@ -10,3 +10,18 @@ cc_binary(
     srcs = ["test.cc"],
     deps = [":person"],
 )
+
+nanopb_cpp_library(
+    name = "simple",
+    src = "simple.proto",
+)
+
+cc_test(
+    name = "simple_test",
+    srcs = ["simple_test.cc"],
+    deps = [
+        ":simple",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
