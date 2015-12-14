@@ -83,7 +83,7 @@ TEST(SimpleTest, Serialize) {
     orig.set_submessage_field(submsg);
 
     uint8_t buf[Simple_size] = { 0 };
-    ASSERT_TRUE(orig.Serialize(buf, Simple_size));
+    ASSERT_TRUE(orig.Serialize(buf, Simple_size).ok());
 
     auto statusor = Simple::Deserialize(buf, Simple_size);
     ASSERT_TRUE(statusor.ok());

@@ -38,9 +38,12 @@ def generate_class(args, message):
     }}
 
     // Serialize to a buffer.
-    bool Serialize(uint8_t *buffer, int size) {{
+    ::util::Status Serialize(uint8_t *buffer, int size) {{
         nanopb::pb_ostream_t stream = nanopb::pb_ostream_from_buffer(buffer, size);
-        return nanopb::pb_encode(&stream, nanopb::{name}_fields, this);
+        if (!nanopb::pb_encode(&stream, nanopb::{name}_fields, this)) {{
+            return ::util::Status(::util::error::Code::UNKNOWN, PB_GET_ERROR(&stream));
+        }}
+        return ::util::Status::OK;
     }}
 
 """.format(name=name, base=base))
