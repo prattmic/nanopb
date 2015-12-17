@@ -32,6 +32,8 @@ class StatusOr {
   // Builds from the specified value.
   inline StatusOr(const T& value);  // NOLINT
 
+  inline StatusOr(T&& value);  // NOLINT
+
   // Copy constructor.
   inline StatusOr(const StatusOr& other);
 
@@ -57,6 +59,11 @@ class StatusOr {
     return value_;
   }
 
+  // FIXME: doesn't build
+  inline T&& Move() {
+    return value_;
+  }
+
   template<typename U> friend class StatusOr;
 
  private:
@@ -77,6 +84,10 @@ inline StatusOr<T>::StatusOr(const ::util::Status& status)
 template <typename T>
 inline StatusOr<T>::StatusOr(const T& value)
     : value_(value) {}
+
+template <typename T>
+inline StatusOr<T>::StatusOr(T&& value)
+    : value_(std::move(value)) {}
 
 template <typename T>
 inline StatusOr<T>::StatusOr(const StatusOr& other)
