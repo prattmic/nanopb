@@ -40,6 +40,6 @@ TEST(StatusOrTest, Move) {
 
     ASSERT_TRUE(statusor.ok());
 
-    auto m = statusor.Move();
-    EXPECT_EQ(1, m);
+    auto m = statusor.ConsumeValue();
+    EXPECT_EQ(1, m.n_);
 }
