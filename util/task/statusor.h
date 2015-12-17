@@ -32,8 +32,13 @@ class StatusOr {
   // Builds from the specified value.
   inline StatusOr(const T& value);  // NOLINT
 
+  inline StatusOr(T&& value);  // NOLINT
+
   // Copy constructor.
   inline StatusOr(const StatusOr& other);
+
+  // Move constructor.
+  inline StatusOr(StatusOr&& other);
 
   // Conversion copy constructor, T must be copy constructible from U.
   template <typename U>
@@ -55,6 +60,10 @@ class StatusOr {
   // Returns value.
   inline const T& Value() const {
     return value_;
+  }
+
+  inline T ConsumeValue() {
+    return std::move(value_);
   }
 
   template<typename U> friend class StatusOr;
@@ -79,8 +88,17 @@ inline StatusOr<T>::StatusOr(const T& value)
     : value_(value) {}
 
 template <typename T>
+inline StatusOr<T>::StatusOr(T&& value)
+    : value_(std::move(value)) {}
+
+template <typename T>
 inline StatusOr<T>::StatusOr(const StatusOr& other)
     : status_(other.status_), value_(other.value_) {
+}
+
+template <typename T>
+inline StatusOr<T>::StatusOr(StatusOr&& other)
+    : status_(std::move(other.status_)), value_(std::move(other.value_)) {
 }
 
 template <typename T>
