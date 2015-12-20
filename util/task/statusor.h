@@ -15,6 +15,7 @@
 #ifndef UTIL_TASK_STATUSOR_H__
 #define UTIL_TASK_STATUSOR_H__
 
+#include <utility>
 #include "util/task/status.h"
 
 namespace util {
