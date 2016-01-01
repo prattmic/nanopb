@@ -90,12 +90,14 @@ TEST(SimpleTest, Serialize) {
     orig.set_submessage_field(submsg);
 
     uint8_t buf[Simple_size] = { 0 };
-    ASSERT_TRUE(orig.Serialize(buf, Simple_size).ok());
+    auto serialize_status = orig.Serialize(buf, Simple_size);
+    ASSERT_TRUE(serialize_status.ok());
+    EXPECT_LE(serialize_status.Value(), static_cast<size_t>(Simple_size));
 
-    auto statusor = Simple::Deserialize(buf, Simple_size);
-    ASSERT_TRUE(statusor.ok());
+    auto deserialize_status = Simple::Deserialize(buf, Simple_size);
+    ASSERT_TRUE(deserialize_status.ok());
 
-    auto decoded = statusor.Value();
+    auto decoded = deserialize_status.Value();
 
     EXPECT_EQ(orig.get_required_field(), decoded.get_required_field());
     EXPECT_EQ(orig.get_optional_field(), decoded.get_optional_field());
