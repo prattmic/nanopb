@@ -18,6 +18,8 @@ TEST(SimpleTest, Defaults) {
     EXPECT_EQ(0, s.get_int_field());
     EXPECT_FALSE(s.present_double_field());
     EXPECT_EQ(0, s.get_double_field());
+    EXPECT_FALSE(s.present_string_field());
+    EXPECT_STREQ("", s.get_string_field());
     EXPECT_FALSE(s.present_enum_field());
     EXPECT_EQ(0, s.get_enum_field());
     EXPECT_FALSE(s.present_submessage_field());
@@ -37,6 +39,7 @@ TEST(SimpleTest, SetGet) {
     s.set_optional_field(true);
     s.set_int_field(42);
     s.set_double_field(2.71);
+    s.set_string_field("hi");
     s.set_enum_field(nanopb::Simple_Enum_TWO);
 
     Simple_SubMessage ss;
@@ -55,6 +58,9 @@ TEST(SimpleTest, SetGet) {
 
     EXPECT_TRUE(s.present_double_field());
     EXPECT_DOUBLE_EQ(2.71, s.get_double_field());
+
+    EXPECT_TRUE(s.present_string_field());
+    EXPECT_STREQ("hi", s.get_string_field());
 
     EXPECT_TRUE(s.present_enum_field());
     EXPECT_EQ(nanopb::Simple_Enum_TWO, s.get_enum_field());
@@ -75,6 +81,7 @@ TEST(SimpleTest, Serialize) {
     orig.set_optional_field(true);
     orig.set_int_field(42);
     orig.set_double_field(2.71);
+    orig.set_string_field("hi");
     orig.set_enum_field(nanopb::Simple_Enum_TWO);
 
     Simple_SubMessage submsg;
@@ -94,6 +101,7 @@ TEST(SimpleTest, Serialize) {
     EXPECT_EQ(orig.get_optional_field(), decoded.get_optional_field());
     EXPECT_EQ(orig.get_int_field(), decoded.get_int_field());
     EXPECT_DOUBLE_EQ(orig.get_double_field(), decoded.get_double_field());
+    EXPECT_STREQ(orig.get_string_field(), decoded.get_string_field());
     EXPECT_EQ(orig.get_enum_field(), decoded.get_enum_field());
     EXPECT_EQ(orig.get_submessage_field().get_required_default_three_field(),
               decoded.get_submessage_field().get_required_default_three_field());

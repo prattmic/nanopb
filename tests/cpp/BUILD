@@ -14,6 +14,7 @@ cc_binary(
 nanopb_cpp_library(
     name = "simple",
     proto = "simple.proto",
+    options = "simple.options",
 )
 
 cc_test(
