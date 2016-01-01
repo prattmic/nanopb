@@ -130,11 +130,14 @@ if __name__ == "__main__":
     parser.add_argument('--include', default=None,
                         help='base nanopb header include path. defaults to PROTO.pb.h.')
 
-    args = parser.parse_args()
+    # Note: the first arg without switches (- or --) will be treated as 'file',
+    # so switches to be passed to nanopb.optparse should be in the form
+    # '--arg=val' rather than '--arg val'.
+    args, unknown = parser.parse_known_args()
     if args.include is None:
         args.include = "%s.pb.h" % (os.path.splitext(args.file)[0])
 
-    options, _ = nanopb.optparser.parse_args([])
+    options, _ = nanopb.optparser.parse_args(unknown)
     proto = nanopb.parse_file(args.file, None, options)
 
     generate(args, proto)
