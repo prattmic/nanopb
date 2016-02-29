@@ -1,4 +1,4 @@
-load("/nanopb", "nanopb_cpp_library")
+load("//:nanopb.bzl", "nanopb_cpp_library")
 
 nanopb_cpp_library(
     name = "person",
