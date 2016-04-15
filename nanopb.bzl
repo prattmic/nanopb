@@ -111,7 +111,7 @@ def nanopb_library(name, proto, options=None):
         name = name,
         srcs = [srcs_name + ".pb.c"],
         hdrs = [srcs_name + ".pb.h"],
-        deps = ["//:nanopb"],
+        deps = [Label("//:nanopb")],
         # We use C++ features, even though these are .c
         copts = [
             "-x",
@@ -223,6 +223,6 @@ def nanopb_cpp_library(name, proto, options=None, lib=None):
         hdrs = [header_name],
         deps = [
             lib,
-            "//util/task:status",
+            Label("//util/task:status"),
         ],
     )
